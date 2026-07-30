@@ -1,0 +1,32 @@
+services:
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongo_data:/data/db
+
+  api:
+    build: .
+    restart: unless-stopped
+    ports:
+      - '5000:5000'
+    environment:
+      NODE_ENV: production
+      PORT: 5000
+      API_PREFIX: /api/v1
+      MONGO_URI: mongodb://mongo:27017/feeflow
+      JWT_SECRET: ${JWT_SECRET:-change-this-to-a-long-random-secret}
+      JWT_EXPIRES_IN: 15m
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-change-this-to-a-different-long-random-secret}
+      JWT_REFRESH_EXPIRES_IN: 7d
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5173}
+    volumes:
+      - ./uploads:/usr/src/app/uploads
+      - ./logs:/usr/src/app/logs
+    depends_on:
+      - mongo
+
+volumes:
+  mongo_data:
