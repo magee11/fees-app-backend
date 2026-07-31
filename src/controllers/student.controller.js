@@ -31,6 +31,14 @@ const deleteStudent = asyncHandler(async (req, res) => {
   sendSuccess(res, { message: 'Student deleted successfully' });
 });
 
+const bulkDeleteStudents = asyncHandler(async (req, res) => {
+  const result = await studentService.bulkDeleteStudents(req.body.ids, req.user);
+  sendSuccess(res, {
+    message: `Bulk delete complete: ${result.deleted} deleted, ${result.failed} failed out of ${result.totalRequested}`,
+    data: result,
+  });
+});
+
 const getPaymentHistory = asyncHandler(async (req, res) => {
   const { data, meta } = await studentService.getPaymentHistory(req.params.id, req.query);
   sendSuccess(res, { message: 'Payment history fetched successfully', data, meta });
@@ -76,6 +84,7 @@ module.exports = {
   createStudent,
   updateStudent,
   deleteStudent,
+  bulkDeleteStudents,
   getPaymentHistory,
   getMonthlyStatus,
   exportStudents,

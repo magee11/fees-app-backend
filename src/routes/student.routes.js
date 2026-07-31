@@ -12,6 +12,7 @@ const {
   listStudentsQuerySchema,
   exportStudentsQuerySchema,
   importTemplateQuerySchema,
+  bulkDeleteStudentsSchema,
 } = require('../validators/student.validator');
 
 const router = express.Router();
@@ -26,6 +27,12 @@ router.post(
   authorize(ROLES.ADMIN, ROLES.STAFF),
   uploadImportFile.single('file'),
   studentController.importStudents
+);
+router.post(
+  '/bulk-delete',
+  authorize(ROLES.ADMIN),
+  validate(bulkDeleteStudentsSchema),
+  studentController.bulkDeleteStudents
 );
 router.get('/:id', validate(idParamSchema), studentController.getStudent);
 router.get('/:id/payment-history', validate(idParamSchema), studentController.getPaymentHistory);

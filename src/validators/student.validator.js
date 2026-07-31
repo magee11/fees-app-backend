@@ -55,6 +55,12 @@ const importTemplateQuerySchema = z.object({
   }),
 });
 
+const bulkDeleteStudentsSchema = z.object({
+  body: z.object({
+    ids: z.array(objectId).min(1, 'Select at least one student').max(500, 'Too many students selected (max 500)'),
+  }),
+});
+
 module.exports = {
   createStudentSchema,
   updateStudentSchema,
@@ -62,4 +68,5 @@ module.exports = {
   listStudentsQuerySchema,
   exportStudentsQuerySchema,
   importTemplateQuerySchema,
+  bulkDeleteStudentsSchema,
 };

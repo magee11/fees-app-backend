@@ -24,7 +24,7 @@ async function computeOutstandingMap(studentIds, year) {
 }
 
 async function listStudents(query) {
-  const { page, limit, skip } = parsePagination(query);
+  const { page, limit, skip } = parsePagination(query, { maxLimit: 1000 });
   const { year } = getCurrentMonthYear();
 
   const filter = {};
@@ -209,6 +209,22 @@ async function deleteStudent(id, actor) {
   });
 }
 
+async function bulkDeleteStudents(ids, actor) {
+  const result = { totalRequested: ids.length, deleted: 0, failed: 0, errors: [] };
+
+  for (const id of ids) {
+    try {
+      await deleteStudent(id, actor);
+      result.deleted += 1;
+    } catch (error) {
+      result.failed += 1;
+      result.errors.push({ id, message: error.message });
+    }
+  }
+
+  return result;
+}
+
 async function getPaymentHistory(studentId, query) {
   const student = await Student.findById(studentId);
   if (!student) throw ApiError.notFound('Student not found');
@@ -297,6 +313,7 @@ module.exports = {
   createStudent,
   updateStudent,
   deleteStudent,
+  bulkDeleteStudents,
   getPaymentHistory,
   getMonthlyStatusForStudent,
   computeOutstandingMap,
