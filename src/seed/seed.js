@@ -5,7 +5,7 @@ const logger = require('../config/logger');
 const env = require('../config/env');
 const { createPrng } = require('./prng');
 const activitiesData = require('./data/activities.data');
-const { FIRST_NAMES, LAST_NAMES, STANDARDS, SECTIONS, PARENT_PREFIX } = require('./data/names.data');
+const { FIRST_NAMES, LAST_NAMES, STANDARDS, SECTIONS } = require('./data/names.data');
 
 const {
   User,
@@ -76,39 +76,18 @@ async function seedSettings() {
   return settings;
 }
 
-function randomPhone(used) {
-  let phone;
-  do {
-    phone = `${prng.randInt(6, 9)}${String(prng.randInt(0, 999999999)).padStart(9, '0')}`;
-  } while (used.has(phone));
-  used.add(phone);
-  return phone;
-}
-
 function buildStudentsPayload(count = 20) {
-  const usedPhones = new Set();
   const students = [];
   for (let i = 0; i < count; i += 1) {
     const first = FIRST_NAMES[i % FIRST_NAMES.length];
     const last = prng.pick(LAST_NAMES);
-    const gender = i % 3 === 0 ? 'F' : prng.rand() < 0.5 ? 'M' : 'F';
-    const dobYear = 2013 + prng.randInt(0, 5);
-    const dobMonth = prng.randInt(1, 12);
-    const dobDay = prng.randInt(1, 28);
 
     students.push({
       admissionNo: `ADM${String(1000 + i).padStart(4, '0')}`,
       name: `${first} ${last}`,
       standard: prng.pick(STANDARDS),
       section: prng.pick(SECTIONS),
-      gender,
-      dob: new Date(dobYear, dobMonth - 1, dobDay),
-      parentName: `${prng.pick(PARENT_PREFIX)} ${prng.pick(LAST_NAMES)} ${last}`,
-      phone: randomPhone(usedPhones),
-      email: '',
-      address: `${prng.randInt(1, 500)} MG Road, Bengaluru, Karnataka`,
       joinedDate: new Date(2026, 0, prng.randInt(1, 28)),
-      photo: '',
       activityCount: prng.randInt(1, 2),
     });
   }

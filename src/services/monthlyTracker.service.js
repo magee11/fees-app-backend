@@ -66,13 +66,13 @@ async function listTracker(query) {
   if (query.search) {
     const regex = new RegExp(escapeRegex(query.search), 'i');
     const matchingStudentIds = await Student.find({
-      $or: [{ name: regex }, { admissionNo: regex }, { phone: regex }],
+      $or: [{ name: regex }, { admissionNo: regex }],
     }).distinct('_id');
     enrollmentFilter.studentId = { $in: matchingStudentIds };
   }
 
   const enrollments = await StudentActivity.find(enrollmentFilter)
-    .populate('studentId', 'name admissionNo standard section phone')
+    .populate('studentId', 'name admissionNo standard section')
     .populate('activityId', 'name monthlyFee color icon')
     .lean();
 

@@ -17,11 +17,37 @@ const { apiLimiter } = require('./middleware/rateLimiter.middleware');
 
 const app = express();
 
+// Netlify gives every deploy preview / branch deploy its own subdomain
+// (e.g. deploy-preview-12--feesapp.netlify.app), so an exact-match allowlist alone
+// breaks those. Allow any *.netlify.app origin automatically, on top of the
+// explicit allowlist (which covers custom domains and local dev) from env.corsOrigin.
+const ALWAYS_ALLOWED_ORIGIN_SUFFIXES = ['.netlify.app'];
+
+function isOriginAllowed(origin) {
+  if (!origin) return true; // non-browser clients (curl, server-to-server, Postman) send no Origin header
+  if (env.corsOrigin.includes(origin)) return true;
+  try {
+    const { hostname } = new URL(origin);
+    return ALWAYS_ALLOWED_ORIGIN_SUFFIXES.some(
+      (suffix) => hostname === suffix.slice(1) || hostname.endsWith(suffix)
+    );
+  } catch {
+    return false;
+  }
+}
+
 app.use(helmet());
 app.use(
   cors({
-    origin: env.corsOrigin,
+    origin: (origin, callback) => {
+      if (isOriginAllowed(origin)) return callback(null, true);
+      logger.warn(`Blocked CORS request from origin: ${origin}`);
+      callback(new Error('Not allowed by CORS'));
+    },
     credentials: true,
+    // Content-Disposition carries the real filename for receipt/report downloads —
+    // browsers don't expose it to JS cross-origin unless explicitly listed here.
+    exposedHeaders: ['Content-Disposition'],
   })
 );
 app.use(express.json({ limit: '2mb' }));

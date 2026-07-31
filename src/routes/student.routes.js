@@ -3,7 +3,7 @@ const studentController = require('../controllers/student.controller');
 const validate = require('../middleware/validate.middleware');
 const { protect } = require('../middleware/auth.middleware');
 const { authorize } = require('../middleware/role.middleware');
-const { uploadStudentPhoto, uploadImportFile } = require('../middleware/upload.middleware');
+const { uploadImportFile } = require('../middleware/upload.middleware');
 const { ROLES } = require('../constants');
 const {
   createStudentSchema,
@@ -34,14 +34,12 @@ router.get('/:id/monthly-status', validate(idParamSchema), studentController.get
 router.post(
   '/',
   authorize(ROLES.ADMIN, ROLES.STAFF),
-  uploadStudentPhoto.single('photo'),
   validate(createStudentSchema),
   studentController.createStudent
 );
 router.put(
   '/:id',
   authorize(ROLES.ADMIN, ROLES.STAFF),
-  uploadStudentPhoto.single('photo'),
   validate(updateStudentSchema),
   studentController.updateStudent
 );

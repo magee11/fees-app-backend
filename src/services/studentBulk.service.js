@@ -16,12 +16,6 @@ const EXPORT_COLUMNS = [
   { header: 'Name', key: 'name', width: 22 },
   { header: 'Standard', key: 'standard', width: 10 },
   { header: 'Section', key: 'section', width: 10 },
-  { header: 'Gender', key: 'gender', width: 8 },
-  { header: 'DOB', key: 'dob', width: 12 },
-  { header: 'Parent Name', key: 'parentName', width: 20 },
-  { header: 'Phone', key: 'phone', width: 14 },
-  { header: 'Email', key: 'email', width: 24 },
-  { header: 'Address', key: 'address', width: 28 },
   { header: 'Activities', key: 'activities', width: 26 },
   { header: 'Status', key: 'status', width: 10 },
   { header: 'Outstanding', key: 'outstanding', width: 14 },
@@ -32,12 +26,6 @@ const TEMPLATE_COLUMNS = [
   { header: 'Name', key: 'name', width: 22 },
   { header: 'Standard', key: 'standard', width: 10 },
   { header: 'Section', key: 'section', width: 10 },
-  { header: 'Gender', key: 'gender', width: 8 },
-  { header: 'DOB', key: 'dob', width: 12 },
-  { header: 'Parent Name', key: 'parentName', width: 20 },
-  { header: 'Phone', key: 'phone', width: 14 },
-  { header: 'Email', key: 'email', width: 24 },
-  { header: 'Address', key: 'address', width: 28 },
   { header: 'Activities', key: 'activities', width: 26 },
   { header: 'Joined Date', key: 'joinedDate', width: 14 },
 ];
@@ -48,12 +36,6 @@ const TEMPLATE_SAMPLE_ROWS = [
     name: 'Aarav Mehta',
     standard: '5th',
     section: 'A',
-    gender: 'M',
-    dob: '2015-06-10',
-    parentName: 'Rohit Mehta',
-    phone: '9876543210',
-    email: 'rohit.mehta@example.com',
-    address: '12 MG Road, Chennai',
     activities: 'Karate, Chess',
     joinedDate: '2026-06-01',
   },
@@ -62,12 +44,6 @@ const TEMPLATE_SAMPLE_ROWS = [
     name: 'Diya Kapoor',
     standard: '3rd',
     section: 'B',
-    gender: 'F',
-    dob: '2017-02-22',
-    parentName: 'Neha Kapoor',
-    phone: '9123456780',
-    email: '',
-    address: '',
     activities: 'Dance',
     joinedDate: '2026-06-01',
   },
@@ -82,17 +58,6 @@ const FIELD_ALIASES = {
   standard: 'standard',
   class: 'standard',
   section: 'section',
-  gender: 'gender',
-  dob: 'dob',
-  'date of birth': 'dob',
-  'parent name': 'parentName',
-  parentname: 'parentName',
-  parent: 'parentName',
-  phone: 'phone',
-  mobile: 'phone',
-  'phone number': 'phone',
-  email: 'email',
-  address: 'address',
   activities: 'activities',
   activity: 'activities',
   'joined date': 'joinedDate',
@@ -151,14 +116,6 @@ async function loadRowsFromFile(filePath, mimetype) {
   return rows;
 }
 
-function normalizeGender(raw) {
-  const v = String(raw || '').trim().toLowerCase();
-  if (!v) return undefined;
-  if (v === 'm' || v === 'male') return 'M';
-  if (v === 'f' || v === 'female') return 'F';
-  return 'Other';
-}
-
 function resolveActivityIds(raw, activityMap) {
   const names = String(raw || '')
     .split(/[,;]/)
@@ -185,12 +142,6 @@ function buildStudentPayload(record, activityMap) {
     name: String(record.name || '').trim(),
     standard: String(record.standard || '').trim(),
     section: String(record.section || '').trim(),
-    gender: normalizeGender(record.gender),
-    dob: record.dob,
-    parentName: String(record.parentName || '').trim(),
-    phone: String(record.phone || '').trim(),
-    email: record.email ? String(record.email).trim() : undefined,
-    address: record.address ? String(record.address).trim() : undefined,
     activities: resolveActivityIds(record.activities, activityMap),
     joinedDate: record.joinedDate || undefined,
   };
@@ -237,7 +188,7 @@ async function exportStudents(query) {
   if (query.activityId) filter.activities = query.activityId;
   if (query.search) {
     const regex = new RegExp(escapeRegex(query.search), 'i');
-    filter.$or = [{ name: regex }, { admissionNo: regex }, { phone: regex }, { parentName: regex }];
+    filter.$or = [{ name: regex }, { admissionNo: regex }];
   }
 
   const students = await Student.find(filter)
@@ -254,12 +205,6 @@ async function exportStudents(query) {
     name: s.name,
     standard: s.standard,
     section: s.section,
-    gender: s.gender || '',
-    dob: s.dob ? new Date(s.dob).toISOString().slice(0, 10) : '',
-    parentName: s.parentName || '',
-    phone: s.phone || '',
-    email: s.email || '',
-    address: s.address || '',
     activities: (s.activities || []).map((a) => a.name).join(', '),
     status: s.status,
     outstanding: outstandingMap.get(String(s._id)) || 0,

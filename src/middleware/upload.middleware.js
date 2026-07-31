@@ -6,7 +6,6 @@ const ApiError = require('../utils/ApiError');
 
 const uploadRoot = path.join(process.cwd(), env.upload.dir);
 const dirs = {
-  photos: path.join(uploadRoot, 'photos'),
   logos: path.join(uploadRoot, 'logos'),
   imports: path.join(uploadRoot, 'imports'),
 };

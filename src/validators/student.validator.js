@@ -1,14 +1,10 @@
 const { z } = require('zod');
-const { objectId, phone, email, paginationQuery } = require('./common');
+const { objectId, paginationQuery } = require('./common');
 const { STUDENT_STATUS } = require('../constants');
 
-// Empty strings arrive routinely from multipart form fields left blank — treat them
-// the same as "not provided" for genuinely optional fields instead of failing validation.
+// Empty strings arrive routinely from multipart/import form fields left blank —
+// treat them the same as "not provided" for genuinely optional fields.
 const blankToUndefined = (val) => (val === '' || val === undefined ? undefined : val);
-const optionalDate = z.preprocess(
-  blankToUndefined,
-  z.coerce.date({ errorMap: () => ({ message: 'Invalid date of birth' }) }).optional(),
-);
 
 const createStudentSchema = z.object({
   body: z.object({
@@ -16,13 +12,6 @@ const createStudentSchema = z.object({
     name: z.string().min(2, 'Name is required'),
     standard: z.string().min(1, 'Standard is required'),
     section: z.string().min(1, 'Section is required'),
-    gender: z.preprocess(blankToUndefined, z.enum(['M', 'F', 'Other']).optional()),
-    dob: optionalDate,
-    parentName: z.string().optional(),
-    phone: z.preprocess(blankToUndefined, phone.optional()),
-    email: email.optional().or(z.literal('')),
-    address: z.string().optional(),
-    photo: z.string().optional(),
     joinedDate: z.coerce.date().optional(),
     activities: z.array(objectId).optional().default([]),
     status: z.enum(Object.values(STUDENT_STATUS)).optional(),

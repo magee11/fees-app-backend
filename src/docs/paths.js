@@ -122,7 +122,7 @@
  *       200: { description: Students fetched successfully }
  *   post:
  *     tags: [Students]
- *     summary: Create a student (multipart/form-data for optional photo upload)
+ *     summary: Create a student (name, standard, section required; activities optional)
  *     responses:
  *       201: { description: Student created }
  *

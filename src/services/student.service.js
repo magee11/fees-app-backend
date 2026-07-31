@@ -34,7 +34,7 @@ async function listStudents(query) {
   if (query.activityId) filter.activities = query.activityId;
   if (query.search) {
     const regex = new RegExp(escapeRegex(query.search), 'i');
-    filter.$or = [{ name: regex }, { admissionNo: regex }, { phone: regex }, { parentName: regex }];
+    filter.$or = [{ name: regex }, { admissionNo: regex }];
   }
 
   if (query.outstanding) {

@@ -21,7 +21,21 @@ const env = {
     refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
   },
 
-  corsOrigin: (process.env.CORS_ORIGIN || 'http://localhost:5173').split(',').map((s) => s.trim()),
+  // Always allow local dev regardless of what CORS_ORIGIN is set to in the deployed
+  // env, so the frontend can point at either a local or the deployed API during
+  // development without editing backend config. Explicit origins from CORS_ORIGIN
+  // (comma-separated) are merged in on top — e.g. the production Netlify URL,
+  // or a future custom domain.
+  corsOrigin: Array.from(
+    new Set([
+      'http://localhost:5173',
+      'http://127.0.0.1:5173',
+      ...(process.env.CORS_ORIGIN || '')
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean),
+    ])
+  ),
 
   rateLimit: {
     windowMs: toNumber(process.env.RATE_LIMIT_WINDOW_MS, 15 * 60 * 1000),
